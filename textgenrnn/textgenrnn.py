@@ -1,5 +1,6 @@
 import json
 import re
+from datetime import datetime
 
 import numpy as np
 import tensorflow as tf
@@ -11,7 +12,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import LabelBinarizer
 from tensorflow import config as config
 from tensorflow.compat.v1.keras.backend import set_session
-from tensorflow.keras.callbacks import LearningRateScheduler
+from tensorflow.keras.callbacks import LearningRateScheduler, TensorBoard
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.preprocessing.text import Tokenizer, text_to_word_sequence
@@ -126,6 +127,7 @@ class textgenrnn:
                        via_new_model=False,
                        save_epochs=0,
                        multi_gpu=False,
+                       tensorboard=False
                        **kwargs):
 
         if new_model and not via_new_model:
@@ -255,18 +257,26 @@ class textgenrnn:
                 print("Training on {} GPUs.".format(num_gpus))
             else:
                 model_t = self.model
+        
+        callbacks = [
+          LearningRateScheduler(
+              lr_linear_decay),
+          generate_after_epoch(
+              self, gen_epochs,
+              max_gen_length),
+          save_model_weights(
+              self, num_epochs,
+              save_epochs)
+        ]
+        
+        if tensorboard:
+          log_dir = "logs/fit/" + self.config.name + "--" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+          tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
+          callbacks.append(tensorboard_callback)
 
         model_t.fit(gen, steps_per_epoch=steps_per_epoch,
                               epochs=num_epochs,
-                              callbacks=[
-                                  LearningRateScheduler(
-                                      lr_linear_decay),
-                                  generate_after_epoch(
-                                      self, gen_epochs,
-                                      max_gen_length),
-                                  save_model_weights(
-                                      self, num_epochs,
-                                      save_epochs)],
+                              callbacks=callbacks,
                               verbose=verbose,
                               max_queue_size=10,
                               validation_data=gen_val,
