@@ -270,7 +270,7 @@ class textgenrnn:
         ]
         
         if tensorboard:
-          log_dir = "logs/fit/" + self.config.name + "--" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+          log_dir = "logs/fit/" + self.config['name'] + "--" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
           tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
           callbacks.append(tensorboard_callback)
 
