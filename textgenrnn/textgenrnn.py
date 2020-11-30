@@ -127,7 +127,7 @@ class textgenrnn:
                        via_new_model=False,
                        save_epochs=0,
                        multi_gpu=False,
-                       tensorboard=False
+                       tensorboard=False,
                        **kwargs):
 
         if new_model and not via_new_model:
