@@ -1,6 +1,6 @@
 import json
 import re
-from datetime import datetime
+import datetime
 
 import numpy as np
 import tensorflow as tf
